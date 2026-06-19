@@ -1,4 +1,4 @@
-# mac-now-playing (prototype)
+# mac-now-playing
 
 A macOS companion for whatever you're playing. The reusable core reads macOS's
 now-playing state (track, artist, live playback position) from MediaRemote; that
