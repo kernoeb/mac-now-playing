@@ -1,4 +1,4 @@
-# 🎵 mac-now-playing
+# 🎵 MacNowPlaying
 
 ![macOS](https://img.shields.io/badge/macOS-14+-111111?logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)
