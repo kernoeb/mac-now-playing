@@ -58,20 +58,28 @@ enum LRCLIB {
         return failed ? nil : []
     }
 
-    /// One artist spelling, both title spellings. MediaRemote often appends a Korean
-    /// subtitle ("하늘 위로 Up") while LRCLIB stores only the English part ("Up"), so on
-    /// a miss we retry with the title's Hangul/parentheses stripped. Returns the
-    /// found lines (nil = none found) plus whether any request failed transiently.
+    /// One artist spelling, several title spellings, tried in order until one hits:
+    ///   1. the exact title;
+    ///   2. the Hangul/parenthesis-simplified form — MediaRemote often appends a
+    ///      Korean subtitle ("하늘 위로 Up") while LRCLIB stores only "Up";
+    ///   3. the base title with a trailing parenthetical dropped — an alternate cut
+    ///      like "FASTLIFE! (acoustique)" isn't indexed under that name, so we fall
+    ///      back to "FASTLIFE!" and let the duration filter pick the upload whose
+    ///      length matches THIS cut (e.g. the 176s acoustic over the 179s studio).
+    /// Returns the found lines (nil = none found) plus whether any request failed
+    /// transiently.
     private static func attempt(_ track: NowPlaying, artist: String) -> (lines: [LyricLine]?, failed: Bool) {
-        let first = resolve(track, artist: artist, title: track.title)
-        if let lines = first.lines, !lines.isEmpty { return (lines, false) }
-        let simple = simplifiedTitle(track.title)
-        if !simple.isEmpty, simple != track.title {
-            let second = resolve(track, artist: artist, title: simple)
-            if let lines = second.lines, !lines.isEmpty { return (lines, false) }
-            return (nil, first.failed || second.failed)
+        var titles = [track.title]
+        for variant in [simplifiedTitle(track.title), baseTitle(track.title)] {
+            if !variant.isEmpty, !titles.contains(variant) { titles.append(variant) }
         }
-        return (nil, first.failed)
+        var failed = false
+        for title in titles {
+            let r = resolve(track, artist: artist, title: title)
+            if let lines = r.lines, !lines.isEmpty { return (lines, false) }
+            failed = failed || r.failed
+        }
+        return (nil, failed)
     }
 
     /// Resolve for a specific artist + title spelling. Fetches the canonical (`/api/get`)
@@ -116,6 +124,16 @@ enum LRCLIB {
         // No canonical → best-ranked search candidate, if any survived the filters.
         if let lines = candidates.first?.lines { return (lines, false) }
         return (nil, failed)
+    }
+
+    /// Drops a trailing parenthetical from a title: "FASTLIFE! (acoustique)" →
+    /// "FASTLIFE!", "Song (feat. X)" → "Song". Unlike `simplifiedTitle` (which keeps
+    /// the inner text), this removes the whole group, so an alternate cut falls back
+    /// to the base track; the duration filter then selects the matching-length upload.
+    static func baseTitle(_ title: String) -> String {
+        let stripped = title.replacingOccurrences(
+            of: #"\s*\([^)]*\)\s*$"#, with: "", options: .regularExpression)
+        return stripped.isEmpty ? title : stripped
     }
 
     /// Strips a trailing parenthetical (e.g. the Korean name) so the artist

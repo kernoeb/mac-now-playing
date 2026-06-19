@@ -28,6 +28,22 @@ SwiftPM emits them into a `MacNowPlaying_MacNowPlaying.bundle` next to the binar
 `scripts/build-app.sh` must copy that bundle into the `.app`'s `Contents/Resources` — without
 it `Bundle.module` fatal-errors at launch. `swift run` finds it automatically.
 
+## Dev loop (do this on every change)
+
+1. `swift build` — must be clean.
+2. `swift test` — must pass, 0 failures (the count grows as tests are added; add tests for new pure logic).
+3. If the change affects runtime behaviour (overlay, menubar, Discord presence), rebuild and relaunch so the live app reflects it, then confirm it's alive AND running the bundle you just built (don't assume):
+   ```sh
+   pkill -f MacNowPlaying.app; sleep 1
+   ./scripts/install.sh                 # rebuilds AND updates /Applications (see gotcha)
+   open -a MacNowPlaying; sleep 1
+   ps aux | grep "MacNowPlaying.app/Contents/MacOS" | grep -v grep   # confirm PID + path
+   ```
+   GOTCHA: `open -a MacNowPlaying` and Spotlight launch the **/Applications** copy, not the repo's `./MacNowPlaying.app`. So after a code change you must `./scripts/install.sh` (which rebuilds + copies to /Applications); a bare `./scripts/build-app.sh` then `open -a` would relaunch the STALE installed build. Always check the running PID's path to confirm. (For a quick repo-only test without installing, `open ./MacNowPlaying.app` after `./scripts/build-app.sh`.)
+4. Verify against LIVE data, never infer — use the debug entry points: `--now` (MediaRemote read incl. source bundle), `--probe "Artist" "Title" <dur>` (lyric lookup), `--discord` (presence IPC), `--art "Artist" "Title"` (cover chain). When a song "isn't found", hit LRCLIB directly with `curl` and read the raw JSON before concluding (e.g. an alternate cut like "Title (acoustique)" is indexed under the base "Title" with a different duration).
+
+Commit/push ONLY when the user asks ("c/p" is shorthand they sometimes use for commit/push).
+
 ## What this project is
 
 A macOS now-playing companion. The reusable core is `MediaRemoteBridge` in

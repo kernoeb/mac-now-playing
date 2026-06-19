@@ -76,6 +76,18 @@ final class LyricsTests: XCTestCase {
         XCTAssertEqual(LRCLIB.simplifiedTitle("안녕"), "")
     }
 
+    // MARK: - baseTitle
+
+    func testBaseTitleDropsTrailingParenthetical() {
+        XCTAssertEqual(LRCLIB.baseTitle("FASTLIFE! (acoustique)"), "FASTLIFE!")
+        XCTAssertEqual(LRCLIB.baseTitle("Song (feat. X)"), "Song")
+    }
+
+    func testBaseTitleLeavesPlainTitleAndKeepsAllParenIfEmptied() {
+        XCTAssertEqual(LRCLIB.baseTitle("DUN DUN"), "DUN DUN")     // nothing to drop
+        XCTAssertEqual(LRCLIB.baseTitle("(Intro)"), "(Intro)")    // would empty → keep original
+    }
+
     // MARK: - containsHangul
 
     func testDetectsHangul() {
