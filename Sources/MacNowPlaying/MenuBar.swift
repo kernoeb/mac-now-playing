@@ -17,6 +17,7 @@ final class MenuBar: NSObject, NSMenuDelegate {
     // model.overlayEnabled.
     private let nowPlayingItem: NSMenuItem
     private let showOverlayItem: NSMenuItem
+    private let discordItem: NSMenuItem
 
     init(model: PlayerModel) {
         self.model = model
@@ -28,6 +29,12 @@ final class MenuBar: NSObject, NSMenuDelegate {
         showOverlayItem = NSMenuItem(
             title: "Show Overlay",
             action: #selector(toggleOverlay(_:)),
+            keyEquivalent: ""
+        )
+
+        discordItem = NSMenuItem(
+            title: "Discord Rich Presence",
+            action: #selector(toggleDiscord(_:)),
             keyEquivalent: ""
         )
 
@@ -52,6 +59,9 @@ final class MenuBar: NSObject, NSMenuDelegate {
         showOverlayItem.target = self
         showOverlayItem.state = model.overlayEnabled ? .on : .off
 
+        discordItem.target = self
+        discordItem.state = model.discordEnabled ? .on : .off
+
         let quitItem = NSMenuItem(
             title: "Quit",
             action: #selector(quit(_:)),
@@ -62,6 +72,7 @@ final class MenuBar: NSObject, NSMenuDelegate {
         menu.addItem(nowPlayingItem)
         menu.addItem(.separator())
         menu.addItem(showOverlayItem)
+        menu.addItem(discordItem)
         menu.addItem(.separator())
         menu.addItem(quitItem)
 
@@ -73,11 +84,19 @@ final class MenuBar: NSObject, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         nowPlayingItem.title = model.nowPlayingDescription
         showOverlayItem.state = model.overlayEnabled ? .on : .off
+        discordItem.state = model.discordEnabled ? .on : .off
     }
 
     @objc private func toggleOverlay(_ sender: NSMenuItem) {
         model.overlayEnabled.toggle()
         sender.state = model.overlayEnabled ? .on : .off
+    }
+
+    @objc private func toggleDiscord(_ sender: NSMenuItem) {
+        // PlayerModel reacts in discordEnabled.didSet: OFF clears presence, ON
+        // re-publishes the current track.
+        model.discordEnabled.toggle()
+        sender.state = model.discordEnabled ? .on : .off
     }
 
     @objc private func quit(_ sender: NSMenuItem) {

@@ -10,6 +10,9 @@ struct NowPlaying: Equatable {
     var timestamp: Double     // wall-clock (epoch seconds) when `elapsed` was sampled; 0 if unknown
     var isPlaying: Bool
     var rate: Double          // playback rate (0 when paused)
+    var sourceBundle: String  // bundle id of the app playing this (parent app for PWAs); "" if unknown
+    var sourcePID: Int32      // process id of the now-playing client; 0 if unknown. Used to
+                              // disambiguate the older `app_mode_loader` Chromium PWA via `ps`.
 
     /// Stable identity for "is this a different track than before?"
     /// Deliberately excludes duration — web players (YT Music) report it late or
@@ -60,6 +63,22 @@ enum MediaRemoteBridge {
             }
           }
         }
+
+        // The source app behind the now-playing item (e.g. Apple Music, Spotify, or
+        // a browser/PWA for web players). Used to tell real audio apps from a random
+        // YouTube video or stream. parentApplicationBundleIdentifier is the real host
+        // for PWAs/helpers; fall back to bundleIdentifier.
+        const pp = Req.localNowPlayingPlayerPath;
+        if (pp && pp.client) {
+          const c = pp.client;
+          if (c.parentApplicationBundleIdentifier && !c.parentApplicationBundleIdentifier.isNil())
+            out.ParentBundle = ObjC.unwrap(c.parentApplicationBundleIdentifier);
+          if (c.bundleIdentifier && !c.bundleIdentifier.isNil())
+            out.Bundle = ObjC.unwrap(c.bundleIdentifier);
+          // PID of the client process: lets us run `ps` on the older `app_mode_loader`
+          // Chromium PWA loader to tell YouTube Music apart from a plain web video.
+          out.SourcePID = c.processIdentifier;
+        }
         return JSON.stringify(out);
       } catch (e) {
         return JSON.stringify({ error: e.toString() });
@@ -107,6 +126,12 @@ enum MediaRemoteBridge {
         func str(_ k: String) -> String { (json[k] as? String) ?? "" }
         func num(_ k: String) -> Double { (json[k] as? NSNumber)?.doubleValue ?? 0 }
 
+        // Double→Int32 is trapping out of range, and SourcePID arrives as a JSON
+        // number, so clamp to the valid Int32 range (0 = unknown) instead of force-
+        // converting.
+        let pidValue = num("SourcePID")
+        let sourcePID: Int32 = (pidValue >= 0 && pidValue < 2_147_483_647) ? Int32(pidValue) : 0
+
         return NowPlaying(
             title: str("Title"),
             artist: str("Artist"),
@@ -115,7 +140,9 @@ enum MediaRemoteBridge {
             elapsed: num("ElapsedTime"),
             timestamp: num("Timestamp"),
             isPlaying: (json["isPlaying"] as? Bool) ?? false,
-            rate: num("PlaybackRate")
+            rate: num("PlaybackRate"),
+            sourceBundle: str("ParentBundle").isEmpty ? str("Bundle") : str("ParentBundle"),
+            sourcePID: sourcePID
         )
     }
 }

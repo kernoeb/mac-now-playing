@@ -91,9 +91,11 @@ final class LyricsTests: XCTestCase {
 
     func testTrackKeyExcludesDuration() {
         let a = NowPlaying(title: "Song", artist: "Band", album: "X",
-                           duration: 180, elapsed: 0, timestamp: 0, isPlaying: true, rate: 1)
+                           duration: 180, elapsed: 0, timestamp: 0, isPlaying: true, rate: 1,
+                           sourceBundle: "", sourcePID: 0)
         let b = NowPlaying(title: "Song", artist: "Band", album: "X",
-                           duration: 999, elapsed: 0, timestamp: 0, isPlaying: true, rate: 1)
+                           duration: 999, elapsed: 0, timestamp: 0, isPlaying: true, rate: 1,
+                           sourceBundle: "", sourcePID: 0)
         XCTAssertEqual(a.trackKey, b.trackKey)   // duration must not affect identity
         XCTAssertEqual(a.trackKey, "Band|Song")
     }
@@ -101,7 +103,8 @@ final class LyricsTests: XCTestCase {
     func testIsValidRequiresArtistAndTitle() {
         func np(_ artist: String, _ title: String) -> NowPlaying {
             NowPlaying(title: title, artist: artist, album: "", duration: 0,
-                       elapsed: 0, timestamp: 0, isPlaying: true, rate: 1)
+                       elapsed: 0, timestamp: 0, isPlaying: true, rate: 1,
+                       sourceBundle: "", sourcePID: 0)
         }
         XCTAssertTrue(np("Band", "Song").isValid)
         XCTAssertFalse(np("", "Song").isValid)

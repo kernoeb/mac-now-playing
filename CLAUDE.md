@@ -16,6 +16,7 @@ swift test --filter testParsesBasicTimestamps   # run a single test by method na
 # Debug entry points (compiled into the app, see main.swift):
 .build/debug/MacNowPlaying --now                          # print the current now-playing read, exit
 .build/debug/MacNowPlaying --probe "Artist" "Title" 200   # fetch + print lyrics for a track, exit
+.build/debug/MacNowPlaying --discord                      # send a test Discord presence ~3s, clear, exit
 ```
 
 There is no linter configured. The app is a `LSUIElement` agent (no Dock icon); a
@@ -52,6 +53,18 @@ design decision; do not "modernize" either to a native API without re-verifying.
 - **Lyrics** (`Lyrics.swift`): fetches from LRCLIB via `/usr/bin/curl`. `URLSession`
   (every variant) stalls ~8s under this app's AppKit run loop; the `curl` subprocess
   returns normally.
+- **Artwork** (`Artwork.swift`): resolves Discord cover art via `/usr/bin/curl` — same
+  curl-not-URLSession rule as `Lyrics.swift`. Discord's `large_image` can't take local
+  artwork bytes; it needs a pre-uploaded asset key or an external `https` URL, so we
+  look one up per track and pass it as the activity's large image. `coverURL` is an
+  **ordered resolver** that returns the first hit: **iTunes Search API first
+  (`iTunesCoverURL`, mirrors `curlJSON`), then a YouTube-thumbnail lookup
+  (`youTubeThumbnailURL` → `curlText` of the results page, then the pure
+  `firstYouTubeVideoID` regex → `i.ytimg.com/.../maxresdefault.jpg`)**. The order is
+  deliberately a single, obvious, easily-swapped sequence in `coverURL` (the user wants
+  iTunes-first parity for now but may flip it later) — reorder by rearranging the two
+  calls. `PlayerModel` caches the result per `trackKey` (negatives cached too) so we
+  hit the chain at most once per track.
 - Both read the subprocess via `readDataToEndOfFile()` with **stderr →
   `FileHandle.nullDevice`** — an unread, full stderr pipe deadlocks the child so
   stdout never closes. `osascript` has no timeout, so its call also arms a 5s
@@ -76,6 +89,69 @@ design decision; do not "modernize" either to a native API without re-verifying.
   user-facing "Show Overlay" toggle in the menubar (`MenuBar.swift`), so turning it
   off orders the window out (and resets hover / `ignoresMouseEvents`) even while
   music plays.
+
+**Discord Rich Presence** (`DiscordRPC.swift`, feature #2): a dependency-free client
+for Discord's local IPC — raw POSIX `AF_UNIX` socket to `$TMPDIR/discord-ipc-N`,
+framed `[UInt32 LE opcode][UInt32 LE length][JSON]`, handshake → await `READY`, then
+`SET_ACTIVITY` (type 2 = Listening → "Listening to LocalMusic"). All socket I/O is on
+a private serial queue; if Discord isn't running every call is a quiet no-op (no
+crash, no hang). The client ID `834057528828100668` is hardcoded — a client ID is
+**public**, not a secret (the Developer-Portal app *name* is what renders after
+"Listening to"). It's driven from `PlayerModel.apply` — the one place with the full
+`NowPlaying` — gated by `discordEnabled` (menubar toggle, default ON) and
+**throttled on change**: presence is only sent on a track change, play↔pause, or a
+seek (>3s vs. the projected start), never on the steady 1s poll. Discord animates the
+progress bar itself from `timestamps.start/end`, so no per-second updates are needed
+(this also stays under Discord's ~15s rate limit). Keep this independent of the
+lyrics feature — it's a parallel consumer of the now-playing engine. **Timestamp-unit
+gotcha**: local IPC `SET_ACTIVITY` takes Unix epoch **seconds** (what we ship); the
+Gateway/REST API uses milliseconds. If the bar ever renders wrong, flip the unit in
+`sendActivityLocked` (one spot, noted in a comment). **Assets (badge + art)**: the
+activity carries four asset fields — `large_image` (a cover URL **or** an asset key),
+`large_text`, `small_image` (always an asset key — the per-source badge),
+`small_text`. `ActivityPayload.Assets` builds the `assets` object when ANY field is
+set (so a no-cover track still ships its source badge) and omits it only when all are
+nil. The large image is **always set**: `art ?? source.imageKey` — the resolved cover
+URL if we have one, otherwise the source's static asset key as a fallback (mirrors the
+sibling project's `artworkUrl || fallbackImage`). The text presence + badge + fallback
+go out immediately; the real cover is resolved on a background queue and, when it lands
+AND it's still the current track, `updatePresence(for:)` re-fires. The change key folds
+in `art != nil` (alongside trackKey + has-end) so this one art-driven re-send isn't
+suppressed by the dedupe and the real cover replaces the fallback key. The art lookup
+is gated behind the same `discordEnabled`/`isPlaying`/`MediaSource.classify` guards.
+**Uploaded asset keys (one-time Discord Portal setup)**: the small badge and the static
+large-image fallback render only if images are uploaded to the LocalMusic app (Rich
+Presence → Art Assets) under the exact keys `spotify`, `telegram`, `youtube-music`.
+Until then Discord shows no badge / no fallback image (graceful); the real
+iTunes/YouTube cover URLs need no upload.
+
+**Source-allowlist gate** (`MediaSource.swift`): presence is published only for real
+music apps. `updatePresence(for:)` calls `MediaSource.classify(bundle:title:pid:)`
+after the `discordEnabled`/`isPlaying` guards; it returns a `Source`
+(`.spotify`/`.telegram`/`.youTubeMusic`) or nil — a non-music source (nil) clears any
+existing presence and sends nothing. The returned `Source` also drives the Discord
+assets: `.imageKey` is the uploaded Art-Asset key (`spotify`/`telegram`/`youtube-music`,
+used for both the small badge and the static large-image fallback) and `.label` is the
+human name for hover/fallback text. `isMusic(bundle:title:pid:)` is a thin
+`classify(...) != nil` wrapper kept for callers/tests that only need the boolean. This
+is a faithful port of the sibling
+`telegram-audio-discord` project's filter (plus Spotify). Why an allowlist and not a
+media-type check: **MediaRemote exposes no "is this music?" field** — `nowPlayingInfo`
+carries no usable kind/type for web players (verified), so the only signal is the
+source app's bundle id, surfaced as `NowPlaying.sourceBundle` (and `sourcePID`), both
+captured from the MediaRemote **client path** (`localNowPlayingPlayerPath.client`:
+`parentApplicationBundleIdentifier` → `bundleIdentifier` for the bundle,
+`processIdentifier` for the pid) in the JXA bridge. Allowlisted: Spotify
+(`com.spotify.client`); Telegram (three bundle ids — but a voice/video message, whose
+"title" is a clock time like "today at 8:12 PM" / "aujourd'hui à 20:12", is rejected
+via `isTelegramVoiceMessage`); YouTube Music as a browser PWA (bundle ending in the
+extension id `.cinhimbnkkaeohfgghhklpknlkffjgod`, OR the older Chromium
+`app_mode_loader` bundle whose process command line — read via `ps -p <pid> -o args=`
+— names "youtube music.app"). The pure logic (bundle/regex/suffix) is separated from
+the impure `ps` branch so it's unit-testable (`MediaSourceTests`). The `app_mode_loader`
+`ps` call is the only impure branch: it fires only for that rare bundle and its results
+are cached per-pid for 30s, so it runs at most once per 30s per pid — cheap enough to
+stay on the main-thread `updatePresence` path without a detached task.
 
 **Playback position is interpolated.** MediaRemote's `ElapsedTime` is a sample taken
 at `Timestamp`; it does not tick on its own (especially web players). `virtualElapsed`

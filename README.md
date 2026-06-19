@@ -13,9 +13,31 @@ plays. Hover over it to make it fully opaque.
   (on 15.4+ MediaRemote only serves now-playing data to Apple-signed callers, so
   a third-party app has to borrow the privilege of a platform binary — see notes).
 - **Lyrics**: [LRCLIB](https://lrclib.net) — free, no API key, time-synced LRC.
-- **Menubar**: a status item shows the current track, toggles the overlay, and quits.
-- **Planned**: Discord Rich Presence and a Genius plain-text fallback, on the same
-  now-playing engine.
+- **Menubar**: a status item shows the current track, toggles the overlay and
+  Discord Rich Presence, and quits.
+- **Planned**: a Genius plain-text lyrics fallback, on the same now-playing engine.
+
+**Feature #2 — Discord Rich Presence.** While music plays, your Discord profile
+shows "Listening to LocalMusic" with the current track (title + artist), a per-source
+badge icon (small image), the album cover art (large image), and a live progress bar.
+The cover is resolved per track via a fallback chain (Discord's `large_image` can't
+take local artwork bytes, so a publicly reachable URL is looked up and passed instead):
+the iTunes Search API first, then a YouTube-thumbnail lookup if iTunes has no match.
+If both miss, the large image falls back to the source's static asset key, so it never
+shows a broken thumbnail. The badge and static fallback only render once images are
+uploaded to the LocalMusic app in the Discord Developer Portal (Rich Presence → Art
+Assets) under the exact keys `spotify`, `telegram`, and `youtube-music`; until then
+Discord simply shows no badge / no fallback image (graceful, no breakage), while the
+real iTunes/YouTube cover URLs work with no upload. Dependency-free: it speaks Discord's local IPC protocol directly over
+a Unix domain socket. Requires the Discord desktop app to be running; if it isn't,
+the feature is a quiet no-op. Toggle it from the menubar ("Discord Rich Presence",
+on by default).
+
+Presence is published **only for real music sources** — YouTube Music, Spotify, and
+Telegram (Telegram voice/video messages are excluded) — matching the sibling
+`telegram-audio-discord` project. Other media that macOS reports as now-playing
+(a YouTube video in a browser, streams, unknown apps) is ignored: no presence is
+sent. The lyrics overlay is unaffected by this gate.
 
 ## Run
 
@@ -46,9 +68,11 @@ note icon), which also shows the current track and a "Show Overlay" toggle.
 | `main.swift` | App bootstrap; transparent borderless floating `NSWindow`, hover polling |
 | `NowPlaying.swift` | **The now-playing engine**: MediaRemote `osascript` bridge → `NowPlaying` snapshot |
 | `Lyrics.swift` | LRCLIB fetch + `[mm:ss.xx]` LRC parser (lyrics feature) |
+| `Artwork.swift` | Cover-art resolver via `curl`: iTunes Search API, then YouTube-thumbnail fallback (Discord feature) |
 | `PlayerModel.swift` | Polls now-playing, fetches lyrics, tracks current line (interpolated) |
 | `LyricsView.swift` | The SwiftUI karaoke view (blur/opacity gradient + spring scroll) |
-| `MenuBar.swift` | Menubar status item: now-playing readout, "Show Overlay" toggle, Quit |
+| `MenuBar.swift` | Menubar status item: now-playing readout, overlay + Discord toggles, Quit |
+| `DiscordRPC.swift` | **Discord Rich Presence**: dependency-free local-IPC client (Discord feature) |
 
 ## Implementation notes (hard-won)
 
@@ -77,12 +101,14 @@ note icon), which also shows the current track and a "Show Overlay" toggle.
   (see `preferRomanized`). A fresh track shows a small loading indicator (three dots)
   until the fetch returns.
 - Debug: `MacNowPlaying --now` prints the current now-playing read and exits;
-  `MacNowPlaying --probe "Artist" "Title" <duration>` fetches lyrics + prints, exits.
+  `MacNowPlaying --probe "Artist" "Title" <duration>` fetches lyrics + prints, exits;
+  `MacNowPlaying --discord` connects to Discord, sends a test presence for ~3s, then
+  clears + exits (reports "Discord not running" if no socket is found);
+  `MacNowPlaying --art "Artist" "Title"` prints the whole resolver chain (the iTunes
+  hit, the YouTube-thumbnail hit, and the resolved final URL), exits.
 
 ## Next steps
 
-- **Discord Rich Presence**: the first feature beyond the overlay to reuse the
-  now-playing engine directly.
 - Reposition/drag, pick alternate LRCLIB version, word-level highlighting, Genius
   plain-text fallback.
 - Consider a tiny on-disk cache so re-playing a track is instant despite LRCLIB lag.

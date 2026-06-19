@@ -18,6 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hoverTimer: Timer?
     private var activity: NSObjectProtocol?
     private var menuBar: MenuBar?
+    // Retained for the app's lifetime; PlayerModel drives presence through it.
+    private let discord = DiscordRPC()
 
     // Height of the interactive band over the current line — one lyric row
     // (matches LyricsView.rowHeight). Only here is the window non-click-through.
@@ -125,10 +127,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        // Inject the Discord client so PlayerModel can publish Rich Presence (a
+        // parallel consumer of the now-playing engine, independent of the overlay).
+        model.discord = discord
+
         // Retain the menubar status item — without a strong reference it vanishes.
         menuBar = MenuBar(model: model)
 
         model.start()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        // Don't leave a stale "Listening to LocalMusic" presence behind on quit.
+        discord.clear()
+        discord.disconnect()
     }
 
     /// Screen-space rect of the current lyric line's visible text: a centred band
@@ -163,7 +175,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 if CommandLine.arguments.contains("--now") {
     if let np = MediaRemoteBridge.query() {
         print("NOW → \(np.artist) — \(np.title)  [playing=\(np.isPlaying) rate=\(np.rate) " +
-              "elapsed=\(np.elapsed) dur=\(np.duration)]")
+              "elapsed=\(np.elapsed) dur=\(np.duration) source=\(np.sourceBundle.isEmpty ? "?" : np.sourceBundle)]")
     } else {
         print("NOW → nothing playing")
     }
@@ -179,7 +191,7 @@ if CommandLine.arguments.first(where: { $0 == "--probe" }) != nil {
     }
     let np = NowPlaying(title: a[3], artist: a[2], album: "",
                         duration: Double(a[4]) ?? 0, elapsed: 0, timestamp: 0,
-                        isPlaying: true, rate: 1)
+                        isPlaying: true, rate: 1, sourceBundle: "", sourcePID: 0)
     // nil = transient failure (504/non-JSON/network) — distinct from a definitive
     // empty result, which prints "0 lines".
     guard let lines = LRCLIB.fetchSynced(for: np) else {
@@ -190,6 +202,66 @@ if CommandLine.arguments.first(where: { $0 == "--probe" }) != nil {
     for l in lines.prefix(4) {
         FileHandle.standardError.write("  [\(l.time)] \(l.text)\n".data(using: .utf8)!)
     }
+    exit(0)
+}
+
+// Debug: `MacNowPlaying --art "Artist" "Title"` → print the whole resolver chain
+// (iTunes hit, YouTube-thumbnail hit, and the resolved final URL), exit. Lets you
+// verify the iTunes → YouTube fallback order end-to-end.
+if CommandLine.arguments.contains("--art") {
+    let a = CommandLine.arguments
+    guard a.count >= 4, let i = a.firstIndex(of: "--art"), i + 2 < a.count else {
+        FileHandle.standardError.write("usage: MacNowPlaying --art \"Artist\" \"Title\"\n".data(using: .utf8)!)
+        exit(2)
+    }
+    let artist = a[i + 1], title = a[i + 2]
+    print("iTunes → \(Artwork.iTunesCoverURL(title: title, artist: artist, album: "") ?? "no match")")
+    print("YouTube → \(Artwork.youTubeThumbnailURL(title: title, artist: artist) ?? "no match")")
+    if let url = Artwork.coverURL(title: title, artist: artist, album: "") {
+        print("resolved → \(url)")
+        exit(0)
+    } else {
+        FileHandle.standardError.write("resolved → no match\n".data(using: .utf8)!)
+        exit(1)
+    }
+}
+
+// Debug: `MacNowPlaying --discord` → connect, send a test activity, hold ~3s so you
+// can eyeball Discord, then clear + exit. End-to-end IPC check.
+if CommandLine.arguments.contains("--discord") {
+    let rpc = DiscordRPC()
+    let group = DispatchGroup()
+    group.enter()
+    rpc.connect { found, ready in
+        print("socket found: \(found)")
+        print("READY received: \(ready)")
+        guard found, ready else {
+            print(found ? "handshake failed" : "Discord not running")
+            group.leave()
+            return
+        }
+        let now = Date()
+        rpc.setActivity(.init(
+            name: "Test Title - Test Artist",
+            details: "Test Title",
+            state: "Test Artist",
+            start: now,
+            end: now.addingTimeInterval(180),
+            largeImage: "spotify",          // asset key fallback (renders once uploaded)
+            largeImageText: "Test Album",
+            smallImage: "spotify",          // source badge (renders once uploaded)
+            smallImageText: "Spotify"
+        )) { sent in
+            print("activity sent: \(sent)")
+            group.leave()
+        }
+    }
+    group.wait()
+    // Hold briefly so the presence is visible in Discord, then clear and exit.
+    Thread.sleep(forTimeInterval: 3)
+    rpc.clear()
+    Thread.sleep(forTimeInterval: 0.3)   // let the clear flush before we exit
+    rpc.disconnect()
     exit(0)
 }
 
