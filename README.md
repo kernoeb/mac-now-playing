@@ -1,12 +1,16 @@
-# mac-now-playing
+# 🎵 mac-now-playing
+
+![macOS](https://img.shields.io/badge/macOS-14+-111111?logo=apple&logoColor=white)
+![Swift](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-3DA639)
 
 A macOS companion for whatever you're playing. It reads the system's now-playing
 state (track, artist, live position) from MediaRemote and builds two features on it:
 
-- **Synced-lyrics overlay**: a transparent, click-through karaoke overlay at the
+- 🎤 **Synced-lyrics overlay**: a transparent, click-through karaoke overlay at the
   bottom of the screen. The current line is bright and sharp, neighbours dim and
   recede, and lines spring upward in time with the song. Hover to make it opaque.
-- **Discord Rich Presence**: puts the current track on your Discord profile with
+- 💬 **Discord Rich Presence**: puts the current track on your Discord profile with
   album art and a live progress bar, for real music only (Spotify, YouTube Music,
   Telegram).
 
