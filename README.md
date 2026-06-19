@@ -13,8 +13,9 @@ plays. Hover over it to make it fully opaque.
   (on 15.4+ MediaRemote only serves now-playing data to Apple-signed callers, so
   a third-party app has to borrow the privilege of a platform binary — see notes).
 - **Lyrics**: [LRCLIB](https://lrclib.net) — free, no API key, time-synced LRC.
-- **Planned**: Discord Rich Presence, menubar now-playing readout, Genius
-  plain-text fallback — all on the same now-playing engine.
+- **Menubar**: a status item shows the current track, toggles the overlay, and quits.
+- **Planned**: Discord Rich Presence and a Genius plain-text fallback, on the same
+  now-playing engine.
 
 ## Run
 
@@ -35,8 +36,8 @@ open MacNowPlaying.app
 
 Produces a double-clickable `MacNowPlaying.app` (`LSUIElement`, so no Dock icon).
 It's ad-hoc signed for local use — for distribution to other Macs you'd sign
-with a Developer ID and notarise. Quit it via Activity Monitor (a menubar quit
-item is a planned addition).
+with a Developer ID and notarise. Quit it from the menubar status item (the music
+note icon), which also shows the current track and a "Show Overlay" toggle.
 
 ## Project layout
 
@@ -47,6 +48,7 @@ item is a planned addition).
 | `Lyrics.swift` | LRCLIB fetch + `[mm:ss.xx]` LRC parser (lyrics feature) |
 | `PlayerModel.swift` | Polls now-playing, fetches lyrics, tracks current line (interpolated) |
 | `LyricsView.swift` | The SwiftUI karaoke view (blur/opacity gradient + spring scroll) |
+| `MenuBar.swift` | Menubar status item: now-playing readout, "Show Overlay" toggle, Quit |
 
 ## Implementation notes (hard-won)
 
@@ -79,10 +81,10 @@ item is a planned addition).
 
 ## Next steps
 
-- **Discord Rich Presence** and a **menubar now-playing readout** — the first
-  features beyond the overlay to reuse the now-playing engine directly.
-- Menubar toggle/quit, reposition/drag, pick alternate LRCLIB version, word-level
-  highlighting, Genius plain-text fallback.
+- **Discord Rich Presence**: the first feature beyond the overlay to reuse the
+  now-playing engine directly.
+- Reposition/drag, pick alternate LRCLIB version, word-level highlighting, Genius
+  plain-text fallback.
 - Consider a tiny on-disk cache so re-playing a track is instant despite LRCLIB lag.
 
 ## License

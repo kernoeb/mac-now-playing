@@ -7,7 +7,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "MacNowPlaying",
-            path: "Sources/MacNowPlaying"
+            path: "Sources/MacNowPlaying",
+            resources: [.copy("Resources/tray-icon.png")]
         ),
         .testTarget(
             name: "MacNowPlayingTests",

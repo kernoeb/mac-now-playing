@@ -10,6 +10,21 @@ final class PlayerModel: ObservableObject {
     @Published private(set) var isPlaying = false    // overlay hides when false (paused/stopped/finished)
     @Published private(set) var isFetching = false   // a lyrics fetch is in flight
 
+    /// User-facing switch from the menubar: when false the overlay window stays off
+    /// screen even while music plays (the hover timer in AppDelegate gates on this
+    /// together with `hasContent`).
+    @Published var overlayEnabled = true
+
+    /// Current "Artist · Title" for the menubar readout, or nil when idle. Uses a
+    /// middle dot (no em dash) per the app's text style.
+    @Published private(set) var currentTrack: String?
+
+    /// Menubar status-row text: the current track, or a "Nothing playing" idle state.
+    var nowPlayingDescription: String {
+        guard isPlaying, let currentTrack else { return "Nothing playing" }
+        return currentTrack
+    }
+
     /// Whether the overlay window should be on screen at all: only when music is
     /// playing AND we either have lyrics or are still looking them up. No music,
     /// or a track with no synced lyrics → the window is hidden entirely (not just
@@ -98,6 +113,7 @@ final class PlayerModel: ObservableObject {
         guard let np, np.isValid else {
             isPlaying = false
             isFetching = false
+            currentTrack = nil
             if let leaving = currentTrackKey {
                 commit(for: leaving)           // remember the track that just ended
                 currentTrackKey = nil
@@ -117,6 +133,9 @@ final class PlayerModel: ObservableObject {
         // New track? Serve from cache, otherwise fetch its lyrics.
         if np.trackKey != currentTrackKey {
             if let leaving = currentTrackKey { commit(for: leaving) }  // remember the track we're leaving
+            // Menubar readout (middle dot separator, no em dash). Track identity is
+            // (artist, title) — the same inputs as trackKey — so it only changes here.
+            currentTrack = np.artist.isEmpty ? np.title : "\(np.artist) · \(np.title)"
             // Known song → its own saved offset; unseen song → the gentle baseline.
             syncOffset = trackOffsets[np.trackKey] ?? learnedOffset
             loadedOffset = syncOffset

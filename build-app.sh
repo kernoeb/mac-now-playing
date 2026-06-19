@@ -18,6 +18,12 @@ rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}/Contents/MacOS" "${BUNDLE}/Contents/Resources"
 cp "${BIN}" "${BUNDLE}/Contents/MacOS/${APP}"
 
+# SwiftPM emits target resources into a <pkg>_<target>.bundle next to the binary
+# (e.g. the tray icon). Bundle.module finds it under the app's Resources at runtime.
+for resbundle in .build/release/*.bundle; do
+    [ -e "${resbundle}" ] && cp -R "${resbundle}" "${BUNDLE}/Contents/Resources/"
+done
+
 cat > "${BUNDLE}/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

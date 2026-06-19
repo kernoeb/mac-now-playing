@@ -17,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let model = PlayerModel()
     private var hoverTimer: Timer?
     private var activity: NSObjectProtocol?
+    private var menuBar: MenuBar?
 
     // Height of the interactive band over the current line — one lyric row
     // (matches LyricsView.rowHeight). Only here is the window non-click-through.
@@ -95,9 +96,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated {       // Timer fires on the main run loop
                 guard let self else { return }
 
-                // Show the window only when there's something to display; otherwise
-                // take it off screen entirely so it can't catch hover or scroll.
-                let show = self.model.hasContent
+                // Show the window only when there's something to display AND the
+                // user hasn't disabled the overlay from the menubar; otherwise take
+                // it off screen entirely so it can't catch hover or scroll.
+                let show = self.model.hasContent && self.model.overlayEnabled
                 if self.window.isVisible != show {
                     if show {
                         self.window.orderFrontRegardless()
@@ -122,6 +124,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+
+        // Retain the menubar status item — without a strong reference it vanishes.
+        menuBar = MenuBar(model: model)
 
         model.start()
     }

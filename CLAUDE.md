@@ -21,6 +21,11 @@ swift test --filter testParsesBasicTimestamps   # run a single test by method na
 There is no linter configured. The app is a `LSUIElement` agent (no Dock icon); a
 running instance is killed with `pkill -f MacNowPlaying.app`.
 
+Target resources (e.g. the menubar `tray-icon.png`) are loaded via `Bundle.module`.
+SwiftPM emits them into a `MacNowPlaying_MacNowPlaying.bundle` next to the binary, so
+`build-app.sh` must copy that bundle into the `.app`'s `Contents/Resources` — without
+it `Bundle.module` fatal-errors at launch. `swift run` finds it automatically.
+
 ## What this project is
 
 A macOS now-playing companion. The reusable core is `MediaRemoteBridge` in
@@ -63,7 +68,11 @@ design decision; do not "modernize" either to a native API without re-verifying.
   renders line 0 as a dim upcoming neighbour rather than highlighting it.
 - `hasContent` (`isPlaying && (!lines.isEmpty || isFetching)`) governs whether the
   window is on screen at all — a track with no lyrics hides the window entirely so
-  it stops catching hover/scroll.
+  it stops catching hover/scroll. The hover timer in `AppDelegate` actually shows
+  the window only when `hasContent && model.overlayEnabled`; `overlayEnabled` is the
+  user-facing "Show Overlay" toggle in the menubar (`MenuBar.swift`), so turning it
+  off orders the window out (and resets hover / `ignoresMouseEvents`) even while
+  music plays.
 
 **Playback position is interpolated.** MediaRemote's `ElapsedTime` is a sample taken
 at `Timestamp`; it does not tick on its own (especially web players). `virtualElapsed`
