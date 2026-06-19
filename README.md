@@ -1,15 +1,20 @@
-# lyrics-overlay (prototype)
+# mac-now-playing (prototype)
 
-A transparent, click-through, always-on-top **karaoke lyrics overlay** for macOS.
-Shows the currently-playing track's synced lyrics at the bottom of the screen:
-current line bright & sharp, neighbouring lines smaller / dimmer / blurrier,
-springing upward as the song plays. Hover over it to make it fully opaque.
+A macOS companion for whatever you're playing. The reusable core reads macOS's
+now-playing state (track, artist, live playback position) from MediaRemote; that
+engine powers the features built on top of it.
+
+**Feature #1 — synced-lyrics overlay.** A transparent, click-through,
+always-on-top karaoke overlay at the bottom of the screen: current line bright &
+sharp, neighbours smaller / dimmer / blurrier, springing upward as the song
+plays. Hover over it to make it fully opaque.
 
 - **Now playing**: macOS MediaRemote, queried via a JXA `osascript` bridge
-  (works on 15.4+, where native framework linking is gated behind a private
-  entitlement).
+  (on 15.4+ MediaRemote only serves now-playing data to Apple-signed callers, so
+  a third-party app has to borrow the privilege of a platform binary — see notes).
 - **Lyrics**: [LRCLIB](https://lrclib.net) — free, no API key, time-synced LRC.
-- **No Discord, no Genius** (yet).
+- **Planned**: Discord Rich Presence, menubar now-playing readout, Genius
+  plain-text fallback — all on the same now-playing engine.
 
 ## Run
 
@@ -24,11 +29,11 @@ Quit from the terminal with Ctrl-C.
 ## Build a release app
 
 ```sh
-./build-app.sh   # → LyricsOverlay.app (optimised, ad-hoc signed)
-open LyricsOverlay.app
+./build-app.sh   # → MacNowPlaying.app (optimised, ad-hoc signed)
+open MacNowPlaying.app
 ```
 
-Produces a double-clickable `LyricsOverlay.app` (`LSUIElement`, so no Dock icon).
+Produces a double-clickable `MacNowPlaying.app` (`LSUIElement`, so no Dock icon).
 It's ad-hoc signed for local use — for distribution to other Macs you'd sign
 with a Developer ID and notarise. Quit it via Activity Monitor (a menubar quit
 item is a planned addition).
@@ -38,17 +43,23 @@ item is a planned addition).
 | File | Role |
 |---|---|
 | `main.swift` | App bootstrap; transparent borderless floating `NSWindow`, hover polling |
-| `NowPlaying.swift` | MediaRemote JXA bridge → `NowPlaying` snapshot |
-| `Lyrics.swift` | LRCLIB fetch + `[mm:ss.xx]` LRC parser |
+| `NowPlaying.swift` | **The now-playing engine**: MediaRemote `osascript` bridge → `NowPlaying` snapshot |
+| `Lyrics.swift` | LRCLIB fetch + `[mm:ss.xx]` LRC parser (lyrics feature) |
 | `PlayerModel.swift` | Polls now-playing, fetches lyrics, tracks current line (interpolated) |
 | `LyricsView.swift` | The SwiftUI karaoke view (blur/opacity gradient + spring scroll) |
 
 ## Implementation notes (hard-won)
 
-- **MediaRemote**: native linking is blocked by Apple's 15.4+ entitlement; the JXA
-  `osascript` bridge is the deliberate workaround. This relies on a **private,
-  undocumented Apple framework** — it's ineligible for the App Store and may break on
-  any macOS update.
+- **MediaRemote / why `osascript`** (verified on 15.6, not assumed): as of macOS
+  15.4 MediaRemote only returns now-playing data to **Apple-signed** callers —
+  platform binaries like `/usr/bin/osascript`, or Apple's own team-signed tools. A
+  third-party app is denied no matter how it's signed: tested ad-hoc *and*
+  Apple-Development-signed builds, both got nil from the `MRNowPlayingRequest` ObjC
+  accessor and an empty dict from the async `MRMediaRemoteGetNowPlayingInfo` C
+  function. So the app shells out to `osascript` (a platform binary that *is*
+  allowed) running the very same `MRNowPlayingRequest` class. This relies on a
+  **private, undocumented Apple framework** — ineligible for the App Store, and may
+  break on any macOS update.
 - **Playback position**: MediaRemote's `ElapsedTime` does NOT tick on its own
   (especially for web players like YT Music) — it's a sample taken at `Timestamp`.
   Live position = `elapsed + (now − Timestamp) × rate`. We capture `Timestamp`
@@ -63,12 +74,15 @@ item is a planned addition).
   the user prefers romanised lyrics and a romanised search candidate's timing agrees
   (see `preferRomanized`). A fresh track shows a small loading indicator (three dots)
   until the fetch returns.
-- Debug: `LyricsOverlay --probe "Artist" "Title" <duration>` fetches + prints, exits.
+- Debug: `MacNowPlaying --now` prints the current now-playing read and exits;
+  `MacNowPlaying --probe "Artist" "Title" <duration>` fetches lyrics + prints, exits.
 
 ## Next steps
 
-- Menubar toggle, reposition/drag, pick alternate LRCLIB version, word-level
-  highlighting, Genius plain-text fallback, Discord RPC.
+- **Discord Rich Presence** and a **menubar now-playing readout** — the first
+  features beyond the overlay to reuse the now-playing engine directly.
+- Menubar toggle/quit, reposition/drag, pick alternate LRCLIB version, word-level
+  highlighting, Genius plain-text fallback.
 - Consider a tiny on-disk cache so re-playing a track is instant despite LRCLIB lag.
 
 ## License

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Builds a release LyricsOverlay.app bundle.
+# Builds a release MacNowPlaying.app bundle.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-APP="LyricsOverlay"
+APP="MacNowPlaying"
 BUNDLE="${APP}.app"
 VERSION="0.1.0"
 BUILD_VERSION="1"
-BUNDLE_ID="com.kernoeb.LyricsOverlay"
+BUNDLE_ID="com.kernoeb.MacNowPlaying"
 
 echo "==> Compiling (release)..."
 swift build -c release
@@ -24,7 +24,7 @@ cat > "${BUNDLE}/Contents/Info.plist" <<PLIST
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>            <string>${APP}</string>
-    <key>CFBundleDisplayName</key>     <string>Lyrics Overlay</string>
+    <key>CFBundleDisplayName</key>     <string>Mac Now Playing</string>
     <key>CFBundleIdentifier</key>      <string>${BUNDLE_ID}</string>
     <key>CFBundleExecutable</key>      <string>${APP}</string>
     <key>CFBundleVersion</key>         <string>${BUILD_VERSION}</string>

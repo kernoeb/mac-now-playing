@@ -1,5 +1,5 @@
 import XCTest
-@testable import LyricsOverlay
+@testable import MacNowPlaying
 
 final class LyricsTests: XCTestCase {
 

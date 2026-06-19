@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "LyricsOverlay",
+    name: "MacNowPlaying",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
-            name: "LyricsOverlay",
-            path: "Sources/LyricsOverlay"
+            name: "MacNowPlaying",
+            path: "Sources/MacNowPlaying"
         ),
         .testTarget(
-            name: "LyricsOverlayTests",
-            dependencies: ["LyricsOverlay"],
-            path: "Tests/LyricsOverlayTests"
+            name: "MacNowPlayingTests",
+            dependencies: ["MacNowPlaying"],
+            path: "Tests/MacNowPlayingTests"
         )
     ]
 )

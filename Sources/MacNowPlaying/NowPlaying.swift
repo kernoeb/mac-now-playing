@@ -19,12 +19,22 @@ struct NowPlaying: Equatable {
     var isValid: Bool { !title.isEmpty && !artist.isEmpty }
 }
 
-/// Queries macOS MediaRemote via a JXA `osascript` bridge.
+/// Queries macOS now-playing state by running a JXA script through `osascript`.
 ///
-/// We shell out to a private-framework trick: on macOS 15.4+ Apple gates the
-/// MediaRemote framework behind a private entitlement, but invoking it through
-/// an interpreted JXA script at runtime still works. Linking the framework
-/// natively from Swift would hit that entitlement wall, so this stays as-is.
+/// Why a subprocess and not a native call (verified on 15.6, not assumed):
+/// on macOS 15.4+ MediaRemote only serves now-playing data to **Apple-signed**
+/// callers — platform binaries like `/usr/bin/osascript`, or Apple's own
+/// team-signed tools. A third-party app is denied no matter how it asks: the
+/// `MRNowPlayingRequest` ObjC accessor returns nil, and the async
+/// `MRMediaRemoteGetNowPlayingInfo` C function fires its completion with an
+/// EMPTY dict. Tested with both an ad-hoc-signed and an Apple-Development-signed
+/// build — both denied; only the Apple-signed interpreter/`osascript` got data.
+/// So we borrow the privilege of the platform binary `osascript`, which is
+/// allowed. (`osascript` runs the same `MRNowPlayingRequest` class we'd call
+/// natively — it's just the only host permitted to.)
+///
+/// This relies on a private, undocumented Apple framework: App Store ineligible,
+/// and may change or break on any macOS update.
 enum MediaRemoteBridge {
     private static let jxa = #"""
     ObjC.import("Foundation");

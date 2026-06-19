@@ -9,7 +9,7 @@ struct LyricLine: Equatable {
 /// Fetches synced lyrics from LRCLIB (free, no API key) and parses the LRC format.
 enum LRCLIB {
     // LRCLIB politely asks clients to identify themselves.
-    private static let userAgent = "lyrics-overlay/0.1 (prototype; https://github.com/kernoeb/lyrics-overlay)"
+    private static let userAgent = "mac-now-playing/0.1 (prototype; https://github.com/kernoeb/mac-now-playing)"
 
     /// Prefer a romanised version over the canonical Hangul one when a well-timed
     /// one is available (user preference). Set false to always use the canonical.

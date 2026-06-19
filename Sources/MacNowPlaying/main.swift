@@ -120,11 +120,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// Debug: `LyricsOverlay --probe "Artist" "Title" duration` → fetch + print, exit.
+// Debug: `MacNowPlaying --now` → print the current MediaRemote read once, exit.
+if CommandLine.arguments.contains("--now") {
+    if let np = MediaRemoteBridge.query() {
+        print("NOW → \(np.artist) — \(np.title)  [playing=\(np.isPlaying) rate=\(np.rate) " +
+              "elapsed=\(np.elapsed) dur=\(np.duration)]")
+    } else {
+        print("NOW → nothing playing")
+    }
+    exit(0)
+}
+
+// Debug: `MacNowPlaying --probe "Artist" "Title" duration` → fetch + print, exit.
 if CommandLine.arguments.first(where: { $0 == "--probe" }) != nil {
     let a = CommandLine.arguments
     guard a.count >= 5 else {
-        FileHandle.standardError.write("usage: LyricsOverlay --probe \"Artist\" \"Title\" <duration>\n".data(using: .utf8)!)
+        FileHandle.standardError.write("usage: MacNowPlaying --probe \"Artist\" \"Title\" <duration>\n".data(using: .utf8)!)
         exit(2)
     }
     let np = NowPlaying(title: a[3], artist: a[2], album: "",
