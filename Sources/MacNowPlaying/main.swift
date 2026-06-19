@@ -26,6 +26,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MUST match LyricsView.currentLineFromBottom so the scroll band lands on it.
     private static let currentLineFromBottom: CGFloat = 78
 
+    // The interactive region is only as WIDE as the current line's rendered text
+    // (centred) — so the empty margins on either side stay click-through and the
+    // overlay only catches the mouse where glyphs actually are. Font size/weight and
+    // horizontal padding MUST match LyricsView (currentSize / .bold / padding 34).
+    private static let currentLineFont = NSFont.systemFont(ofSize: 30, weight: .bold)
+    private static let textHPadding: CGFloat = 34
+    // A little slack around the glyphs so the text stays comfortable to hover/scroll.
+    private static let hitMargin: CGFloat = 16
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Prevent App Nap from throttling our polling + network while unfocused,
         // but still allow the Mac to idle-sleep normally — a passive overlay has
@@ -100,23 +109,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 guard show else { return }
 
-                // Only the current line is interactive: a one-row band over it near the
-                // window's bottom. The cursor there captures scroll (to calibrate) and
-                // brightens the overlay; everywhere else the window stays click-through,
-                // so it never blocks the large, mostly-empty area it covers.
-                let f = self.window.frame
-                let band = NSRect(x: f.minX,
-                                  y: f.minY + Self.currentLineFromBottom - Self.centerBandHeight / 2,
-                                  width: f.width, height: Self.centerBandHeight)
-                let onLine = band.contains(NSEvent.mouseLocation)
-                if onLine != self.model.isHovering {
-                    self.model.isHovering = onLine
-                    self.window.ignoresMouseEvents = !onLine
+                // Only the current line's visible text is interactive: a centred band
+                // sized to the rendered glyphs (see currentLineRect). The cursor there
+                // captures scroll (to calibrate) and brightens the overlay; everywhere
+                // else — including the empty margins beside the text — the window stays
+                // click-through, so it never blocks the large area it covers.
+                let onText = self.currentLineRect(in: self.window.frame)?
+                    .contains(NSEvent.mouseLocation) ?? false
+                if onText != self.model.isHovering {
+                    self.model.isHovering = onText
+                    self.window.ignoresMouseEvents = !onText
                 }
             }
         }
 
         model.start()
+    }
+
+    /// Screen-space rect of the current lyric line's visible text: a centred band
+    /// just wide enough for the rendered glyphs (clamped to the text area, plus a
+    /// little slack), one row tall, at the current-line position. `nil` when there's
+    /// no line to target (no lyrics yet / still loading) — then nothing is interactive
+    /// and the whole window is click-through.
+    private func currentLineRect(in frame: NSRect) -> NSRect? {
+        let lines = model.lines
+        guard !lines.isEmpty else { return nil }
+        // Before the first line starts (currentIndex == -1) the upcoming line 0 is the
+        // sensible target; otherwise clamp into range defensively.
+        let idx = max(0, min(model.currentIndex, lines.count - 1))
+        let text = lines[idx].text.isEmpty ? "♪" : lines[idx].text
+
+        let maxContentWidth = frame.width - 2 * Self.textHPadding
+        let measured = (text as NSString).size(withAttributes: [.font: Self.currentLineFont]).width
+        // minimumScaleFactor shrinks an over-long line to fit the text area, so the
+        // rendered width never exceeds maxContentWidth.
+        let width = min(measured, maxContentWidth) + 2 * Self.hitMargin
+
+        return NSRect(
+            x: frame.midX - width / 2,
+            y: frame.minY + Self.currentLineFromBottom - Self.centerBandHeight / 2,
+            width: width,
+            height: Self.centerBandHeight
+        )
     }
 }
 
