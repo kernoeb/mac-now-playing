@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Builds a release MacNowPlaying.app bundle.
+# Builds a release MacNowPlaying.app bundle. Lives in scripts/ but runs from the
+# repo root so Package.swift / .build / the app bundle resolve.
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 APP="MacNowPlaying"
 BUNDLE="${APP}.app"
@@ -24,6 +25,9 @@ for resbundle in .build/release/*.bundle; do
     [ -e "${resbundle}" ] && cp -R "${resbundle}" "${BUNDLE}/Contents/Resources/"
 done
 
+# App icon (regenerate with: swift scripts/make-icon.swift then iconutil).
+[ -e scripts/AppIcon.icns ] && cp scripts/AppIcon.icns "${BUNDLE}/Contents/Resources/AppIcon.icns"
+
 cat > "${BUNDLE}/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -33,6 +37,7 @@ cat > "${BUNDLE}/Contents/Info.plist" <<PLIST
     <key>CFBundleDisplayName</key>     <string>Mac Now Playing</string>
     <key>CFBundleIdentifier</key>      <string>${BUNDLE_ID}</string>
     <key>CFBundleExecutable</key>      <string>${APP}</string>
+    <key>CFBundleIconFile</key>        <string>AppIcon</string>
     <key>CFBundleVersion</key>         <string>${BUILD_VERSION}</string>
     <key>CFBundleShortVersionString</key> <string>${VERSION}</string>
     <key>CFBundlePackageType</key>     <string>APPL</string>

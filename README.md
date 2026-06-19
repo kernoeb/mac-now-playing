@@ -26,8 +26,11 @@ Quit from the terminal with Ctrl-C.
 ## Build a release app
 
 ```sh
-./build-app.sh   # → MacNowPlaying.app (optimised, ad-hoc signed)
+./scripts/build-app.sh   # → MacNowPlaying.app (optimised, ad-hoc signed)
 open MacNowPlaying.app
+
+./scripts/install.sh     # build + copy to /Applications; then launch via Spotlight,
+                         # `open -a MacNowPlaying`, or add as a Login Item to auto-start
 ```
 
 Produces a double-clickable `MacNowPlaying.app` (`LSUIElement`, so no Dock icon).

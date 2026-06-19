@@ -11,7 +11,8 @@ swift run                   # build + launch the overlay (no Dock icon; Ctrl-C t
 swift test                  # run the test suite (XCTest)
 swift test --filter testParsesBasicTimestamps   # run a single test by method name
 
-./build-app.sh              # → MacNowPlaying.app (release, ad-hoc signed)
+./scripts/build-app.sh      # → MacNowPlaying.app (release, ad-hoc signed)
+./scripts/install.sh        # build + copy to /Applications
 
 # Debug entry points (compiled into the app, see main.swift):
 .build/debug/MacNowPlaying --now                          # print the current now-playing read, exit
@@ -24,7 +25,7 @@ running instance is killed with `pkill -f MacNowPlaying.app`.
 
 Target resources (e.g. the menubar `tray-icon.png`) are loaded via `Bundle.module`.
 SwiftPM emits them into a `MacNowPlaying_MacNowPlaying.bundle` next to the binary, so
-`build-app.sh` must copy that bundle into the `.app`'s `Contents/Resources` — without
+`scripts/build-app.sh` must copy that bundle into the `.app`'s `Contents/Resources` — without
 it `Bundle.module` fatal-errors at launch. `swift run` finds it automatically.
 
 ## What this project is
