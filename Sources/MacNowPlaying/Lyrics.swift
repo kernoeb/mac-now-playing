@@ -30,36 +30,57 @@ enum LRCLIB {
     /// prefers romanised lyrics, we swap in a romanised candidate ONLY when its
     /// first line agrees with the canonical's (so a shifted upload can never sneak
     /// in). Synchronous (shells out to `curl`) — call from a background queue.
-    static func fetchSynced(for track: NowPlaying) -> [LyricLine] {
+    /// Returns the resolved synced lyrics, or `nil` when the lookup failed
+    /// transiently (a 504/non-JSON/network error somewhere in the attempt chain
+    /// while no lyrics were found) — `nil` must NOT be cached, so the next poll
+    /// retries. A non-nil result (possibly `[]`) is definitive: LRCLIB was reached
+    /// and either has no synced lyrics for this track or returned the ones below.
+    static func fetchSynced(for track: NowPlaying) -> [LyricLine]? {
         let fullArtist = normalizedArtist(track.artist)
-        if let lines = attempt(track, artist: fullArtist) { return lines }
+        let first = attempt(track, artist: fullArtist)
+        if let lines = first.lines { return lines }
         // Collaboration credits ("Sunburn et Nelt.", "X feat. Y") usually aren't how
         // LRCLIB indexes the track — it files it under the lead act ("Sunburn"). Retry
         // with just the lead artist. This runs ONLY after the full credit misses, so a
         // band whose real name contains "and"/"&"/"," ("Florence and the Machine") is
         // matched in full first and never reaches the aggressive split.
         let lead = primaryArtist(fullArtist)
-        if lead != fullArtist, let lines = attempt(track, artist: lead) { return lines }
-        return []
+        var failed = first.failed
+        if lead != fullArtist {
+            let second = attempt(track, artist: lead)
+            if let lines = second.lines { return lines }
+            failed = failed || second.failed
+        }
+        // No lyrics found. If any underlying request hard-failed transiently, the
+        // overall outcome is a failure (nil → don't cache, retry); otherwise every
+        // request answered and this is a definitive empty ([] → cache it).
+        return failed ? nil : []
     }
 
     /// One artist spelling, both title spellings. MediaRemote often appends a Korean
     /// subtitle ("하늘 위로 Up") while LRCLIB stores only the English part ("Up"), so on
-    /// a miss we retry with the title's Hangul/parentheses stripped.
-    private static func attempt(_ track: NowPlaying, artist: String) -> [LyricLine]? {
-        if let lines = resolve(track, artist: artist, title: track.title), !lines.isEmpty { return lines }
+    /// a miss we retry with the title's Hangul/parentheses stripped. Returns the
+    /// found lines (nil = none found) plus whether any request failed transiently.
+    private static func attempt(_ track: NowPlaying, artist: String) -> (lines: [LyricLine]?, failed: Bool) {
+        let first = resolve(track, artist: artist, title: track.title)
+        if let lines = first.lines, !lines.isEmpty { return (lines, false) }
         let simple = simplifiedTitle(track.title)
-        if !simple.isEmpty, simple != track.title,
-           let lines = resolve(track, artist: artist, title: simple), !lines.isEmpty { return lines }
-        return nil
+        if !simple.isEmpty, simple != track.title {
+            let second = resolve(track, artist: artist, title: simple)
+            if let lines = second.lines, !lines.isEmpty { return (lines, false) }
+            return (nil, first.failed || second.failed)
+        }
+        return (nil, first.failed)
     }
 
     /// Resolve for a specific artist + title spelling. Fetches the canonical (`/api/get`)
     /// and search candidates concurrently; the canonical defines the trusted start
     /// time, and a romanised candidate is only swapped in when its timing agrees.
-    private static func resolve(_ track: NowPlaying, artist norm: String, title: String) -> [LyricLine]? {
-        var canonical: [LyricLine]?
-        var candidates: [Candidate] = []
+    /// Returns the lines (nil = no usable match) plus whether either concurrent
+    /// request hard-failed transiently (so the caller can retry rather than cache).
+    private static func resolve(_ track: NowPlaying, artist norm: String, title: String) -> (lines: [LyricLine]?, failed: Bool) {
+        var canonical: (lines: [LyricLine]?, failed: Bool) = (nil, false)
+        var search: (candidates: [Candidate], failed: Bool) = ([], false)
         let group = DispatchGroup()
         group.enter()
         DispatchQueue.global().async {
@@ -68,26 +89,32 @@ enum LRCLIB {
         }
         group.enter()
         DispatchQueue.global().async {
-            candidates = searchCandidates(track, artist: norm, title: title)
+            search = searchCandidates(track, artist: norm, title: title)
             group.leave()
         }
         group.wait()
 
-        if let canonical, !canonical.isEmpty {
+        let candidates = search.candidates
+        // A request that 504'd anywhere here means a no-match could be a false
+        // negative, so propagate the failure flag whenever we end up empty-handed.
+        let failed = canonical.failed || search.failed
+
+        if let canon = canonical.lines, !canon.isEmpty {
             // Already romanised (or user doesn't care) → use the trusted version.
-            guard preferRomanized, containsHangul(canonical), let ref = canonical.first?.time
-            else { return canonical }
+            guard preferRomanized, containsHangul(canon), let ref = canon.first?.time
+            else { return (canon, false) }
             // Hangul canonical: prefer a romanised candidate whose timing matches.
             if let romanized = candidates.first(where: {
                 $0.isRomanized && abs($0.firstTime - ref) <= timingTolerance
             }) {
-                return romanized.lines
+                return (romanized.lines, false)
             }
-            return canonical
+            return (canon, false)
         }
 
-        // No canonical (get failed entirely) → best-ranked search candidate.
-        return candidates.first?.lines
+        // No canonical → best-ranked search candidate, if any survived the filters.
+        if let lines = candidates.first?.lines { return (lines, false) }
+        return (nil, failed)
     }
 
     /// Strips a trailing parenthetical (e.g. the Korean name) so the artist
@@ -146,7 +173,11 @@ enum LRCLIB {
 
     // MARK: - /api/get
 
-    private static func getExact(_ track: NowPlaying, artist: String, title: String) -> [LyricLine]? {
+    /// Returns the canonical synced lyrics (nil = LRCLIB has no synced canonical
+    /// for this query), plus `failed` = the request hard-failed transiently (504
+    /// /non-JSON/network) after retries. A `failed` request gives no information,
+    /// so the caller must treat "no lyrics anywhere" as a failure, not an empty.
+    private static func getExact(_ track: NowPlaying, artist: String, title: String) -> (lines: [LyricLine]?, failed: Bool) {
         var comps = URLComponents(string: "https://lrclib.net/api/get")!
         comps.queryItems = [
             .init(name: "artist_name", value: artist),
@@ -154,19 +185,25 @@ enum LRCLIB {
             .init(name: "album_name", value: track.album),
             .init(name: "duration", value: String(Int(track.duration.rounded()))),
         ]
-        guard let dict = getJSON(comps.url) as? [String: Any],
-              let synced = dict["syncedLyrics"] as? String else { return nil }
-        return parseLRC(synced)
+        guard case .value(let json) = getJSON(comps.url) else { return (nil, true) }
+        // Definitive JSON answer (possibly a 404 object, or a hit without synced
+        // lyrics): not a failure, just no usable canonical.
+        guard let dict = json as? [String: Any],
+              let synced = dict["syncedLyrics"] as? String else { return (nil, false) }
+        return (parseLRC(synced), false)
     }
 
     // MARK: - /api/search
 
     /// Synced search hits, filtered to the right cut and ranked: exact title
     /// first (so "Dynamite" beats "Dynamite - EDM Remix"), then closest duration.
-    private static func searchCandidates(_ track: NowPlaying, artist: String, title: String) -> [Candidate] {
+    /// `failed` = the search request hard-failed transiently after retries (so an
+    /// empty candidate list means "nothing found", not "the request died").
+    private static func searchCandidates(_ track: NowPlaying, artist: String, title: String) -> (candidates: [Candidate], failed: Bool) {
         var comps = URLComponents(string: "https://lrclib.net/api/search")!
         comps.queryItems = [.init(name: "q", value: "\(artist) \(title)")]
-        guard let arr = getJSON(comps.url) as? [[String: Any]] else { return [] }
+        guard case .value(let json) = getJSON(comps.url) else { return ([], true) }
+        guard let arr = json as? [[String: Any]] else { return ([], false) }
 
         let wantTitle = title.lowercased()
         let scored = arr.compactMap { hit -> (Int, Double, [LyricLine])? in
@@ -180,18 +217,51 @@ enum LRCLIB {
             let titleRank = name == wantTitle ? 0 : (name.hasPrefix(wantTitle) ? 1 : 2)
             return (titleRank, delta, lines)
         }
-        return scored
+        let ranked = scored
             .sorted { ($0.0, $0.1) < ($1.0, $1.1) }
             .map { Candidate(lines: $0.2) }
+        return (ranked, false)
     }
 
     // MARK: - networking
 
+    /// Outcome of a single LRCLIB request. We must tell a *definitive* answer
+    /// (the server replied with valid JSON — even a 404 "track not found" object
+    /// counts) from a *transient failure* (504 gateway HTML, an empty body, or a
+    /// curl/network error), because only the latter should be retried upstream and
+    /// must never be cached as "no lyrics". A parse failure ⇒ transient; a
+    /// successful parse ⇒ definitive, even when the JSON is a 404 error object.
+    private enum JSONResult {
+        case value(Any)   // server replied with parseable JSON (the definitive answer)
+        case failure      // 504/non-JSON/empty/network error after retries — retry upstream
+    }
+
     /// Shells out to `curl`. URLSession requests stall to ~8s under this app's
     /// AppKit run loop (bundle-less GUI executable), but a subprocess is immune —
     /// the same reason the MediaRemote bridge uses `osascript`.
-    private static func getJSON(_ url: URL?) -> Any? {
-        guard let url else { return nil }
+    ///
+    /// Bounded retry: under the concurrent /api/get + /api/search load LRCLIB
+    /// frequently answers a single request with an nginx 504 Gateway Time-out HTML
+    /// page (not JSON). That body fails to parse, so we retry a couple of times with
+    /// a short backoff — a retry almost always succeeds. We only retry parse
+    /// failures: a *valid* JSON body (including LRCLIB's 404 "not found" object) is
+    /// a real answer and is returned immediately, never retried.
+    private static func getJSON(_ url: URL?) -> JSONResult {
+        guard let url else { return .failure }
+        let backoffs: [Double] = [0.3, 0.6]   // delays AFTER attempts 1 and 2; 3 attempts total
+        for attempt in 0...backoffs.count {
+            if let json = curlJSON(url) { return .value(json) }
+            // Parse failed (504 HTML, empty body, or curl error) → transient. Back
+            // off briefly and retry, unless this was the last attempt.
+            if attempt < backoffs.count { Thread.sleep(forTimeInterval: backoffs[attempt]) }
+        }
+        return .failure
+    }
+
+    /// One curl invocation. Returns the parsed JSON, or nil if the body didn't
+    /// parse (a 504 HTML page, an empty body, or a curl/network error) — the caller
+    /// treats nil as a transient failure worth retrying.
+    private static func curlJSON(_ url: URL) -> Any? {
         let proc = Process()
         proc.executableURL = URL(fileURLWithPath: "/usr/bin/curl")
         proc.arguments = ["-s", "--max-time", "10", "-H", "User-Agent: \(userAgent)", url.absoluteString]

@@ -61,8 +61,11 @@ design decision; do not "modernize" either to a native API without re-verifying.
 **Data flow** (`PlayerModel.swift`, `@MainActor` `ObservableObject`): two timers.
 - `poll()` every 1s runs the MediaRemote query off-main (`Task.detached`), guarded
   by `isPolling` so a slow query never stacks overlapping subprocess spawns. On a
-  new `trackKey` it serves from `lyricsCache` (empty results cached too, so
-  "no-lyrics" tracks aren't refetched) or kicks off a background LRCLIB fetch.
+  new `trackKey` it serves from `lyricsCache` (a genuine "LRCLIB has no synced
+  lyrics" empty IS cached, so "no-lyrics" tracks aren't refetched; a transient
+  fetch failure — 504/non-JSON/network, surfaced as `fetchSynced` returning `nil`
+  — is NOT cached, so the next poll retries and self-heals) or kicks off a
+  background LRCLIB fetch.
 - `tick()` every 0.08s recomputes `currentIndex` from the interpolated position.
 - `currentIndex == -1` means "not started" (before the first line) — the view
   renders line 0 as a dim upcoming neighbour rather than highlighting it.

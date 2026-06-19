@@ -180,7 +180,12 @@ if CommandLine.arguments.first(where: { $0 == "--probe" }) != nil {
     let np = NowPlaying(title: a[3], artist: a[2], album: "",
                         duration: Double(a[4]) ?? 0, elapsed: 0, timestamp: 0,
                         isPlaying: true, rate: 1)
-    let lines = LRCLIB.fetchSynced(for: np)
+    // nil = transient failure (504/non-JSON/network) — distinct from a definitive
+    // empty result, which prints "0 lines".
+    guard let lines = LRCLIB.fetchSynced(for: np) else {
+        FileHandle.standardError.write("PROBE → FAILED (transient: 504/non-JSON/network)\n".data(using: .utf8)!)
+        exit(1)
+    }
     FileHandle.standardError.write("PROBE → \(lines.count) lines\n".data(using: .utf8)!)
     for l in lines.prefix(4) {
         FileHandle.standardError.write("  [\(l.time)] \(l.text)\n".data(using: .utf8)!)

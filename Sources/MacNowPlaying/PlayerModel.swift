@@ -64,8 +64,10 @@ final class PlayerModel: ObservableObject {
     private var loadedOffset: Double = 0
 
     // Synced lyrics already fetched this session, keyed by trackKey. Avoids
-    // re-hitting LRCLIB when the user replays or skips back to a track. Empty
-    // results are cached too, so "no lyrics" tracks aren't retried every time.
+    // re-hitting LRCLIB when the user replays or skips back to a track. A genuine
+    // "LRCLIB has no synced lyrics for this track" empty IS cached (so lyric-less
+    // tracks aren't refetched forever); a transient fetch failure (504/non-JSON/
+    // network) is NOT cached, so the next 1s poll retries and self-heals.
     private var lyricsCache: [String: [LyricLine]] = [:]
 
     // True while a MediaRemote query is in flight, so the 1s poll never stacks
@@ -155,10 +157,19 @@ final class PlayerModel: ObservableObject {
             DispatchQueue.global(qos: .userInitiated).async {
                 let fetched = LRCLIB.fetchSynced(for: np)
                 DispatchQueue.main.async {
-                    // Cache regardless of the current track (the result is valid
-                    // for np.trackKey), but only show it if still the live track.
-                    self.lyricsCache[np.trackKey] = fetched
                     guard np.trackKey == self.currentTrackKey else { return }
+                    guard let fetched else {
+                        // Transient failure (504/non-JSON/network). Don't cache, and
+                        // clear currentTrackKey so the next 1s poll re-enters this
+                        // branch and retries — self-healing instead of stuck on the
+                        // loading dots forever. isFetching stays true so hasContent
+                        // keeps the overlay alive across the retry.
+                        self.currentTrackKey = nil
+                        return
+                    }
+                    // Definitive result (lyrics, or a genuine empty). Cache it (valid
+                    // for np.trackKey) so we don't refetch, and show it live.
+                    self.lyricsCache[np.trackKey] = fetched
                     self.lines = fetched
                     self.isFetching = false
                 }
