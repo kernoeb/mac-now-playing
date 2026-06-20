@@ -74,7 +74,6 @@ lookup), `--discord` (test presence), `--art "Artist" "Title"` (cover resolver).
 
 - Reposition/drag, pick alternate LRCLIB version, word-level highlighting, Genius
   plain-text fallback.
-- Consider a tiny on-disk cache so re-playing a track is instant despite LRCLIB lag.
 
 ## License
 

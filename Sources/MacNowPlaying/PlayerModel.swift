@@ -101,6 +101,11 @@ final class PlayerModel: ObservableObject {
     // "LRCLIB has no synced lyrics for this track" empty IS cached (so lyric-less
     // tracks aren't refetched forever); a transient fetch failure (504/non-JSON/
     // network) is NOT cached, so the next 1s poll retries and self-heals.
+    // Backed by `LyricsCache` on disk: a miss here falls through to the disk cache
+    // before any LRCLIB fetch. Only tracks we found *lyrics* for are written to disk
+    // (those never go stale); a genuine empty is kept in memory only, so a song that
+    // simply has no lyrics on LRCLIB *yet* (e.g. a new release) is re-checked next
+    // session instead of being cached empty forever.
     private var lyricsCache: [String: [LyricLine]] = [:]
 
     // Resolved cover URLs, keyed by trackKey. Negative results (no iTunes match) are
@@ -194,6 +199,16 @@ final class PlayerModel: ObservableObject {
                 isFetching = false
                 return
             }
+            // In-memory miss → try the disk cache before fetching. A track resolved
+            // in an earlier session loads instantly and offline, dodging LRCLIB's
+            // latency. Promote the hit into the in-memory cache so we read disk at
+            // most once per track per session.
+            if let disk = LyricsCache.load(np.trackKey) {
+                lyricsCache[np.trackKey] = disk
+                lines = disk
+                isFetching = false
+                return
+            }
 
             lines = []
             isFetching = true
@@ -212,9 +227,15 @@ final class PlayerModel: ObservableObject {
                         self.currentTrackKey = nil
                         return
                     }
-                    // Definitive result (lyrics, or a genuine empty). Cache it (valid
-                    // for np.trackKey) so we don't refetch, and show it live.
+                    // Definitive result (lyrics, or a genuine empty). Cache in memory
+                    // either way so replaying the track this session doesn't refetch.
+                    // Persist to disk ONLY when we actually found lyrics: real lyrics
+                    // never go stale, but an empty means "LRCLIB has none *yet*" — which
+                    // is wrong for a newly released track that gets lyrics added days
+                    // later. Keeping the empty in memory only lets the next session
+                    // re-check and pick them up, instead of poisoning the song forever.
                     self.lyricsCache[np.trackKey] = fetched
+                    if !fetched.isEmpty { LyricsCache.save(fetched, for: np.trackKey) }
                     self.lines = fetched
                     self.isFetching = false
                 }

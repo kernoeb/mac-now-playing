@@ -1,7 +1,8 @@
 import Foundation
 
-/// One timestamped lyric line.
-struct LyricLine: Equatable {
+/// One timestamped lyric line. `Codable` so the disk cache (`LyricsCache`) can
+/// persist resolved lyrics between sessions.
+struct LyricLine: Equatable, Codable {
     let time: Double   // seconds
     let text: String   // may be empty (instrumental break → shown as ♪)
 }
