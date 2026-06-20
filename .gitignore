@@ -3,3 +3,4 @@
 *.xcodeproj
 .swiftpm/
 MacNowPlaying.app/
+.claude/settings.local.json

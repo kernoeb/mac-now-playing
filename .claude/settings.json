@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(swift build:*)",
+      "Bash(swift test:*)",
+      "Bash(swift run:*)",
+      "Bash(.build/debug/MacNowPlaying:*)",
+      "Bash(./scripts/build-app.sh:*)",
+      "Bash(open -a MacNowPlaying:*)",
+      "Bash(open ./MacNowPlaying.app:*)",
+      "Bash(pkill -f MacNowPlaying.app:*)",
+      "Bash(ps aux:*)",
+      "Bash(sleep:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(echo:*)",
+      "Bash(curl:*)",
+      "Bash(defaults read:*)"
+    ]
+  }
+}
