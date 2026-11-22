@@ -1,0 +1,11 @@
+{
+  "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/DerivedSources/resource_bundle_accessor.swift" : {
+    "abi-baseline-json" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying.abi.json",
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary.dia",
+    "swiftdoc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying.swiftdoc",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying.swiftmodule",
+    "swiftsourceinfo" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Release/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying.swiftsourceinfo"
+  }
+}
