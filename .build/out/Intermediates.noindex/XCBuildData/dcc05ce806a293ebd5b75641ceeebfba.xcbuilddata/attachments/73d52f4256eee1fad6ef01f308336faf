@@ -1,0 +1,119 @@
+{
+  "" : {
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary.dia",
+    "emit-module-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary-emit-module.dia",
+    "pch" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MacNowPlaying-primary.swiftdeps"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/DerivedSources/resource_bundle_accessor.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/resource_bundle_accessor~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/Artwork.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Artwork~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/DiscordRPC.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/DiscordRPC~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/Lyrics.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/Lyrics~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/LyricsCache.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsCache~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/LyricsView.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/LyricsView~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/MediaSource.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MediaSource~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/MenuBar.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/MenuBar~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/NowPlaying.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/NowPlaying~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/PlayerModel.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/PlayerModel~partial.swiftmodule"
+  },
+  "/Users/ollie/Downloads/mac-now-playing-main/Sources/MacNowPlaying/main.swift" : {
+    "const-values" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.swiftconstvalues",
+    "dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.d",
+    "diagnostics" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.dia",
+    "index-unit-output-path" : "/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.o",
+    "llvm-bc" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.bc",
+    "object" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.o",
+    "swift-dependencies" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main.swiftdeps",
+    "swiftmodule" : "/Users/ollie/Downloads/mac-now-playing-main/.build/out/Intermediates.noindex/MacNowPlaying.build/Debug/MacNowPlaying-p.build/Objects-normal/arm64/main~partial.swiftmodule"
+  }
+}

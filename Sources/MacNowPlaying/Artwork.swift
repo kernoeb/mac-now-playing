@@ -90,7 +90,7 @@ enum Artwork {
               let url = URL(string: "https://www.youtube.com/results?search_query=\(encoded)"),
               let html = curlText(url),
               let videoID = firstYouTubeVideoID(inResultsHTML: html) else { return nil }
-        return "https://i.ytimg.com/vi/\(videoID)/maxresdefault.jpg"
+        return "https://i.ytimg.com/vi/\(videoID)/hqdefault.jpg"
     }
 
     // MARK: - Pure helpers (testable)

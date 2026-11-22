@@ -21,7 +21,7 @@ final class DiscordRPC {
     /// (it's shipped in every Discord-integrated app and visible to anyone), so it's
     /// fine to hardcode. Whatever this application is *named* in Discord's Developer
     /// Portal is the text that renders after "Listening to" — here, "LocalMusic".
-    private static let clientID = "834057528828100668"
+    private static let clientID = "1574108275039932426"
 
     /// Activity type 2 = Listening, so the status reads "Listening to LocalMusic".
     /// (0 = Playing, 1 = Streaming, 2 = Listening, 3 = Watching.)
@@ -54,6 +54,7 @@ final class DiscordRPC {
         // (`spotify`/`telegram`/`youtube-music`), never a URL. nil → no badge.
         var smallImage: String?
         var smallImageText: String?   // hover text — the source label
+        var type: Int = 2
     }
 
     // All socket access is confined to this serial queue. fd is only touched here.
@@ -290,7 +291,7 @@ final class DiscordRPC {
                     smallText: a.smallImageText.map(Self.clamp))
                 : nil
             payload = ActivityPayload(
-                type: Self.listeningType,
+                type: a.type,
                 name: Self.clamp(a.name),
                 details: Self.clamp(a.details),
                 state: Self.clamp(a.state),

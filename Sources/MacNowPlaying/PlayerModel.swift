@@ -367,7 +367,8 @@ final class PlayerModel: ObservableObject {
             largeImage: largeImage,
             largeImageText: largeImageText,
             smallImage: source.imageKey,
-            smallImageText: source.label
+            smallImageText: source.label,
+            type: source.activityType
         ))
     }
 

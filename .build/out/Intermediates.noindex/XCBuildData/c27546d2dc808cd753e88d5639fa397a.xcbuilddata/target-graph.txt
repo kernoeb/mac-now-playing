@@ -1,0 +1,7 @@
+Target dependency graph (3 targets)
+Target 'AllExcludingTests' in project 'Aggregate'
+➜ Explicit dependency on target 'MacNowPlaying-product' in project 'MacNowPlaying'
+➜ Explicit dependency on target 'MacNowPlaying_MacNowPlaying' in project 'MacNowPlaying'
+Target 'MacNowPlaying-product' in project 'MacNowPlaying'
+➜ Explicit dependency on target 'MacNowPlaying_MacNowPlaying' in project 'MacNowPlaying'
+Target 'MacNowPlaying_MacNowPlaying' in project 'MacNowPlaying' (no dependencies)
