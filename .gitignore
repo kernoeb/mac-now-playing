@@ -1,6 +1,0 @@
-.build/
-.DS_Store
-*.xcodeproj
-.swiftpm/
-MacNowPlaying.app/
-.claude/settings.local.json
